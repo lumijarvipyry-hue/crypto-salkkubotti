@@ -1,13 +1,22 @@
-name: Test market data
+name: Test market data and indicators
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "data/market_data.py"
+      - "strategy/indicators.py"
+      - "tests/test_indicators.py"
+      - "requirements.txt"
+      - ".github/workflows/test-market-data.yml"
 
 permissions:
   contents: read
 
 jobs:
-  test-market-data:
+  test-market-data-and-indicators:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -27,15 +36,24 @@ jobs:
           pip install -r requirements.txt
 
       - name: Check Python syntax
-        run: python -m py_compile data/market_data.py
+        run: |
+          python -m py_compile data/market_data.py
+          python -m py_compile strategy/indicators.py
+          python -m py_compile tests/test_indicators.py
+
+      - name: Test technical indicators
+        run: python tests/test_indicators.py
 
       - name: Download and validate market data
         run: python data/market_data.py
 
-      - name: Save downloaded data
+      - name: Save approved data and audit report
         uses: actions/upload-artifact@v4
         with:
           name: crypto-market-data
-          path: data/history/*.csv
+          path: |
+            data/history/*.csv
+            data/market_data_audit.csv
+            data/approved_assets.txt
           if-no-files-found: error
           retention-days: 7

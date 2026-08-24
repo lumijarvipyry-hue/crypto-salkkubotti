@@ -43,6 +43,12 @@ YAHOO_TICKERS: Dict[str, str] = {
     symbol: f"{symbol}-USD" for symbol in CRYPTO_SYMBOLS
 }
 
+YAHOO_TICKERS.update(
+    {
+        "SUI": "SUI20947-USD",
+        "TAO": "TAO22974-USD",
+    }
+)
 DATA_DIRECTORY = Path(__file__).resolve().parent / "history"
 START_DATE = "2020-01-01"
 MINIMUM_ROWS = 200
@@ -91,7 +97,9 @@ def _normalise_columns(data: pd.DataFrame) -> pd.DataFrame:
     for column in wanted_columns:
         data[column] = pd.to_numeric(data[column], errors="coerce")
 
-    data = data.dropna(subset=["open", "high", "low", "close"])
+        data = data.dropna(subset=["open", "high", "low", "close"])
+    price_columns = ["open", "high", "low", "close"]
+    data = data[(data[price_columns] > 0).all(axis=1)]
     data = data.drop_duplicates(subset=["timestamp"], keep="last")
     data = data.sort_values("timestamp").reset_index(drop=True)
 

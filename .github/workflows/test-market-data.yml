@@ -41,6 +41,9 @@ jobs:
           python -m py_compile strategy/indicators.py
           python -m py_compile tests/test_indicators.py
 
+      - name: Test market scanner
+        run: python tests/test_scanner.py
+        
       - name: Test technical indicators
         run: python tests/test_indicators.py
 
